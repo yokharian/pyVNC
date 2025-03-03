@@ -6,10 +6,23 @@ from pyVNC import constants
 from pyVNC.Buffer import DisplayBuffer, ArrayBuffer
 from pyVNC.VNCFactory import VNCFactory
 import logging
+
 logger = logging.getLogger("pyVNC")
 
+
 class Client(Thread):
-    def __init__(self, host="127.0.0.1", password=None, port=5902, depth=32, fast=False, shared=True, gui=False, array=False, callbacks=[]):
+    def __init__(
+        self,
+        host="127.0.0.1",
+        password=None,
+        port=5902,
+        depth=32,
+        fast=False,
+        shared=True,
+        gui=False,
+        array=False,
+        callbacks=[],
+    ):
         Thread.__init__(self)
         pygame.init()
         self.has_gui = gui
@@ -58,7 +71,6 @@ class Client(Thread):
         elif type(key) == str:
             self.screen.protocol.key_event(ord(key), down=0)
 
-
     def _send_mouse_raw(self, event="Left", position=(0, 0)):
         # Left 1, Middle 2, Right 3,
         button_id = None
@@ -71,7 +83,6 @@ class Client(Thread):
 
         self.screen.protocol.pointer_event(position[0], position[1], 0)
         self.screen.protocol.pointer_event(position[0], position[1], button_id)
-
 
     def send_mouse(self, event="Left", position=(0, 0), duration=0.001):
         # Left 1, Middle 2, Right 3,
@@ -89,11 +100,9 @@ class Client(Thread):
         time.sleep(duration)
         self.screen.protocol.pointer_event(position[0], position[1], 0)
 
-
     def add_callback(self, interval, cb):
         l = task.LoopingCall(cb)
         l.start(interval)
-
 
     def run_block(self):
         reactor.connectTCP(
@@ -105,7 +114,7 @@ class Client(Thread):
                 self.fast,  # if a fast connection is used
                 self.password,  # password or none
                 int(self.shared),  # shared session flag
-            )
+            ),
         )
 
         # Create callbacks
@@ -117,7 +126,6 @@ class Client(Thread):
 
             except:
                 logger.error("Callbacks must be formed as (fps, callback_fn)")
-
 
         # run the application
         reactor.callLater(0.1, self.screen.loop)

@@ -58,7 +58,9 @@ class RFBToGUI(pyVNC.rfb.RFBClient):
         """new bitmap data"""
         # print("%s " * 5 % (x, y, width, height, len(data)))
         # ~ log.msg("screen update")
-        self.canvas.blit(pygame.image.fromstring(data, (width, height), 'RGBX'), (x, y)) # TODO Color Format
+        self.canvas.blit(
+            pygame.image.fromstring(data, (width, height), "RGBX"), (x, y)
+        )  # TODO Color Format
 
     def copy_rectangle(self, srcx, srcy, x, y, width, height):
         """copy src rectangle -> destinantion"""
@@ -84,15 +86,23 @@ class RFBToGUIeightbits(RFBToGUI):
         self.remoteframebuffer.set_protocol(self)
         self.remoteframebuffer.set_rfb_size(self.width, self.height, 8)
         self.set_encodings(self.factory.encodings)
-        self.set_pixel_format(bpp=8, depth=8, bigendian=0, truecolor=1,
-                              redmax=7, greenmax=7, bluemax=3,
-                              redshift=5, greenshift=2, blueshift=0
-                              )
+        self.set_pixel_format(
+            bpp=8,
+            depth=8,
+            bigendian=0,
+            truecolor=1,
+            redmax=7,
+            greenmax=7,
+            bluemax=3,
+            redshift=5,
+            greenshift=2,
+            blueshift=0,
+        )
         self.palette = self.screen.get_palette()
         self.framebuffer_update_request()
 
     def update_rectangle(self, x, y, width, height, data):
-        bmp = pygame.image.fromstring(data, (width, height), 'P')
+        bmp = pygame.image.fromstring(data, (width, height), "P")
         bmp.set_palette(self.palette)
         self.screen.blit(bmp, (x, y))
 

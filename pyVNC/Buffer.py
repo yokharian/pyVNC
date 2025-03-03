@@ -113,21 +113,30 @@ class DisplayBuffer(Buffer):
                 self.protocol.pointer_event(e.pos[0], e.pos[1], self.buttons)
 
             if e.type == MOUSEBUTTONUP:
-                if e.button == 1: self.buttons &= ~1
-                if e.button == 2: self.buttons &= ~2
-                if e.button == 3: self.buttons &= ~4
-                if e.button == 4: self.buttons &= ~8
-                if e.button == 5: self.buttons &= ~16
+                if e.button == 1:
+                    self.buttons &= ~1
+                if e.button == 2:
+                    self.buttons &= ~2
+                if e.button == 3:
+                    self.buttons &= ~4
+                if e.button == 4:
+                    self.buttons &= ~8
+                if e.button == 5:
+                    self.buttons &= ~16
                 self.protocol.pointer_event(e.pos[0], e.pos[1], self.buttons)
 
             if e.type == MOUSEBUTTONDOWN:
-                if e.button == 1: self.buttons |= 1
-                if e.button == 2: self.buttons |= 2
-                if e.button == 3: self.buttons |= 4
-                if e.button == 4: self.buttons |= 8
-                if e.button == 5: self.buttons |= 16
+                if e.button == 1:
+                    self.buttons |= 1
+                if e.button == 2:
+                    self.buttons |= 2
+                if e.button == 3:
+                    self.buttons |= 4
+                if e.button == 4:
+                    self.buttons |= 8
+                if e.button == 5:
+                    self.buttons |= 16
                 self.protocol.pointer_event(e.pos[0], e.pos[1], self.buttons)
 
             return not seen_events
         return not seen_events
-

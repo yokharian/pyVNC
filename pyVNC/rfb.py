@@ -36,32 +36,32 @@ ZRLE_ENCODING = 16
 
 # keycode's
 # for KeyEvent()
-KEY_BackSpace = 0xff08
-KEY_Tab = 0xff09
-KEY_Return = 0xff0d
-KEY_Escape = 0xff1b
-KEY_Insert = 0xff63
-KEY_Delete = 0xffff
-KEY_Home = 0xff50
-KEY_End = 0xff57
-KEY_PageUp = 0xff55
-KEY_PageDown = 0xff56
-KEY_Left = 0xff51
-KEY_Up = 0xff52
-KEY_Right = 0xff53
-KEY_Down = 0xff54
-KEY_F1 = 0xffbe
-KEY_F2 = 0xffbf
-KEY_F3 = 0xffc0
-KEY_F4 = 0xffc1
-KEY_F5 = 0xffc2
-KEY_F6 = 0xffc3
-KEY_F7 = 0xffc4
-KEY_F8 = 0xffc5
-KEY_F9 = 0xffc6
-KEY_F10 = 0xffc7
-KEY_F11 = 0xffc8
-KEY_F12 = 0xffc9
+KEY_BackSpace = 0xFF08
+KEY_Tab = 0xFF09
+KEY_Return = 0xFF0D
+KEY_Escape = 0xFF1B
+KEY_Insert = 0xFF63
+KEY_Delete = 0xFFFF
+KEY_Home = 0xFF50
+KEY_End = 0xFF57
+KEY_PageUp = 0xFF55
+KEY_PageDown = 0xFF56
+KEY_Left = 0xFF51
+KEY_Up = 0xFF52
+KEY_Right = 0xFF53
+KEY_Down = 0xFF54
+KEY_F1 = 0xFFBE
+KEY_F2 = 0xFFBF
+KEY_F3 = 0xFFC0
+KEY_F4 = 0xFFC1
+KEY_F5 = 0xFFC2
+KEY_F6 = 0xFFC3
+KEY_F7 = 0xFFC4
+KEY_F8 = 0xFFC5
+KEY_F9 = 0xFFC6
+KEY_F10 = 0xFFC7
+KEY_F11 = 0xFFC8
+KEY_F12 = 0xFFC9
 KEY_F13 = 0xFFCA
 KEY_F14 = 0xFFCB
 KEY_F15 = 0xFFCC
@@ -70,14 +70,14 @@ KEY_F17 = 0xFFCE
 KEY_F18 = 0xFFCF
 KEY_F19 = 0xFFD0
 KEY_F20 = 0xFFD1
-KEY_ShiftLeft = 0xffe1
-KEY_ShiftRight = 0xffe2
-KEY_ControlLeft = 0xffe3
-KEY_ControlRight = 0xffe4
-KEY_MetaLeft = 0xffe7
-KEY_MetaRight = 0xffe8
-KEY_AltLeft = 0xffe9
-KEY_AltRight = 0xffea
+KEY_ShiftLeft = 0xFFE1
+KEY_ShiftRight = 0xFFE2
+KEY_ControlLeft = 0xFFE3
+KEY_ControlRight = 0xFFE4
+KEY_MetaLeft = 0xFFE7
+KEY_MetaRight = 0xFFE8
+KEY_AltLeft = 0xFFE9
+KEY_AltRight = 0xFFEA
 
 KEY_Scroll_Lock = 0xFF14
 KEY_Sys_Req = 0xFF15
@@ -112,23 +112,22 @@ class RFBClient(Protocol, TimeoutMixin):
     def timeoutConnection(self):
         self.transport.abortConnection()
 
-
     # ------------------------------------------------------
     # states used on connection startup
     # ------------------------------------------------------
 
     def _handle_initial(self):
-        buffer = b''.join(self._packet)
-        if b'\n' in buffer:
-            if buffer[:3] == 'RFB':
+        buffer = b"".join(self._packet)
+        if b"\n" in buffer:
+            if buffer[:3] == "RFB":
                 # ~ print "rfb"
-                maj, min = [int(x) for x in buffer[3:-1].split(b'.')]
+                maj, min = [int(x) for x in buffer[3:-1].split(b".")]
                 # ~ print maj, min
                 if (maj, min) not in [(3, 3), (3, 7), (3, 8)]:
                     log.msg("wrong protocol version\n")
                     self.transport.loseConnection()
             buffer = buffer[12:]
-            self.transport.write(b'RFB 003.003\n')
+            self.transport.write(b"RFB 003.003\n")
             log.msg("connected\n")
             self._packet[:] = [buffer]
             self._packet_len = len(buffer)
@@ -165,7 +164,7 @@ class RFBClient(Protocol, TimeoutMixin):
 
     def send_password(self, password):
         """send password"""
-        pw = (password + '\0' * 8)[:8]  # make sure its 8 chars long, zero padded
+        pw = (password + "\0" * 8)[:8]  # make sure its 8 chars long, zero padded
         des = RFBDes(pw)
         response = des.encrypt(self._challenge)
         self.transport.write(response)
@@ -191,10 +190,18 @@ class RFBClient(Protocol, TimeoutMixin):
 
     def _handle_server_init(self, block):
         (self.width, self.height, pixformat, namelen) = unpack("!HH16sI", block)
-        (self.bpp, self.depth, self.bigendian, self.truecolor,
-         self.redmax, self.greenmax, self.bluemax,
-         self.redshift, self.greenshift, self.blueshift) = \
-            unpack("!BBBBHHHBBBxxx", pixformat)
+        (
+            self.bpp,
+            self.depth,
+            self.bigendian,
+            self.truecolor,
+            self.redmax,
+            self.greenmax,
+            self.bluemax,
+            self.redshift,
+            self.greenshift,
+            self.blueshift,
+        ) = unpack("!BBBBHHHBBBxxx", pixformat)
         self.bypp = self.bpp / 8  # calc bytes per pixel
         self.expect(self._handle_server_name, namelen)
 
@@ -241,11 +248,22 @@ class RFBClient(Protocol, TimeoutMixin):
             if encoding == COPY_RECTANGLE_ENCODING:
                 self.expect(self._handleDecodeCopyrect, 4, x, y, width, height)
             elif encoding == RAW_ENCODING:
-                self.expect(self._handle_decode_raw, width * height * self.bypp, x, y, width, height)
+                self.expect(
+                    self._handle_decode_raw,
+                    width * height * self.bypp,
+                    x,
+                    y,
+                    width,
+                    height,
+                )
             elif encoding == HEXTILE_ENCODING:
-                self._do_next_hextile_subrect(None, None, x, y, width, height, None, None)
+                self._do_next_hextile_subrect(
+                    None, None, x, y, width, height, None, None
+                )
             elif encoding == CORRE_ENCODING:
-                self.expect(self._handle_decode_corre, 4 + self.bypp, x, y, width, height)
+                self.expect(
+                    self._handle_decode_corre, 4 + self.bypp, x, y, width, height
+                )
             elif encoding == RRE_ENCODING:
                 self.expect(self._handleDecodeRRE, 4 + self.bypp, x, y, width, height)
                 # ~ elif encoding == ZRLE_ENCODING:
@@ -277,7 +295,9 @@ class RFBClient(Protocol, TimeoutMixin):
         color = block[4:]
         self.fill_rectangle(x, y, width, height, color)
         if subrects:
-            self.expect(self._handle_rre_sub_rectangles, (8 + self.bypp) * subrects, x, y)
+            self.expect(
+                self._handle_rre_sub_rectangles, (8 + self.bypp) * subrects, x, y
+            )
         else:
             self._do_connection()
 
@@ -295,7 +315,7 @@ class RFBClient(Protocol, TimeoutMixin):
         sz = self.bypp + 8
         format = "!%dsHHHH" % self.bypp
         while pos < end:
-            (color, x, y, width, height) = unpack(format, block[pos:pos + sz])
+            (color, x, y, width, height) = unpack(format, block[pos : pos + sz])
             self.fill_rectangle(topx + x, topy + y, width, height, color)
             pos += sz
         self._do_connection()
@@ -314,7 +334,9 @@ class RFBClient(Protocol, TimeoutMixin):
         color = block[4:]
         self.fill_rectangle(x, y, width, height, color)
         if subrects:
-            self.expect(self._handle_decode_corre_rectangles, (4 + self.bypp) * subrects, x, y)
+            self.expect(
+                self._handle_decode_corre_rectangles, (4 + self.bypp) * subrects, x, y
+            )
         else:
             self._do_connection()
 
@@ -325,7 +347,7 @@ class RFBClient(Protocol, TimeoutMixin):
         sz = self.bypp + 4
         format = "!%dsBBBB" % self.bypp
         while pos < sz:
-            (color, x, y, width, height) = unpack(format, block[pos:pos + sz])
+            (color, x, y, width, height) = unpack(format, block[pos : pos + sz])
             self.fill_rectangle(topx + x, topy + y, width, height, color)
             pos += sz
         self._do_connection()
@@ -362,7 +384,9 @@ class RFBClient(Protocol, TimeoutMixin):
         if ty >= y + height:
             self._do_connection()
         else:
-            self.expect(self._handle_decode_hextile, 1, bg, color, x, y, width, height, tx, ty)
+            self.expect(
+                self._handle_decode_hextile, 1, bg, color, x, y, width, height, tx, ty
+            )
 
     def _handle_decode_hextile(self, block, bg, color, x, y, width, height, tx, ty):
         """
@@ -389,8 +413,20 @@ class RFBClient(Protocol, TimeoutMixin):
 
         # decode tile
         if sub_encoding & 1:  # RAW
-            self.expect(self._handle_decode_hextile_raw, tw * th * self.bypp, bg, color, x, y, width, height, tx, ty, tw,
-                        th)
+            self.expect(
+                self._handle_decode_hextile_raw,
+                tw * th * self.bypp,
+                bg,
+                color,
+                x,
+                y,
+                width,
+                height,
+                tx,
+                ty,
+                tw,
+                th,
+            )
         else:
             num_bytes = 0
             if sub_encoding & 2:  # BackgroundSpecified
@@ -400,21 +436,36 @@ class RFBClient(Protocol, TimeoutMixin):
             if sub_encoding & 8:  # AnySubrects
                 num_bytes += 1
             if num_bytes:
-                self.expect(self._handle_decode_hextile_subrect, num_bytes, sub_encoding, bg, color, x, y, width, height, tx,
-                            ty, tw, th)
+                self.expect(
+                    self._handle_decode_hextile_subrect,
+                    num_bytes,
+                    sub_encoding,
+                    bg,
+                    color,
+                    x,
+                    y,
+                    width,
+                    height,
+                    tx,
+                    ty,
+                    tw,
+                    th,
+                )
             else:
                 self.fill_rectangle(tx, ty, tw, th, bg)
                 self._do_next_hextile_subrect(bg, color, x, y, width, height, tx, ty)
 
-    def _handle_decode_hextile_subrect(self, block, subencoding, bg, color, x, y, width, height, tx, ty, tw, th):
+    def _handle_decode_hextile_subrect(
+        self, block, subencoding, bg, color, x, y, width, height, tx, ty, tw, th
+    ):
         subrects = 0
         pos = 0
         if subencoding & 2:  # BackgroundSpecified
-            bg = block[:int(self.bypp)]
+            bg = block[: int(self.bypp)]
             pos += self.bypp
         self.fill_rectangle(tx, ty, tw, th, bg)
         if subencoding & 4:  # ForegroundSpecified
-            color = block[pos:pos + self.bypp]
+            color = block[pos : pos + self.bypp]
             pos += self.bypp
         if subencoding & 8:  # AnySubrects
             # ~ (subrects, ) = unpack("!B", block)
@@ -422,20 +473,50 @@ class RFBClient(Protocol, TimeoutMixin):
         # ~ print subrects
         if subrects:
             if subencoding & 16:  # SubrectsColoured
-                self.expect(self._handle_decode_hextile_subrects_coloured, (self.bypp + 2) * subrects, bg, color, subrects,
-                            x, y, width, height, tx, ty, tw, th)
+                self.expect(
+                    self._handle_decode_hextile_subrects_coloured,
+                    (self.bypp + 2) * subrects,
+                    bg,
+                    color,
+                    subrects,
+                    x,
+                    y,
+                    width,
+                    height,
+                    tx,
+                    ty,
+                    tw,
+                    th,
+                )
             else:
-                self.expect(self._handle_decode_hextile_subrects_fg, 2 * subrects, bg, color, subrects, x, y, width, height,
-                            tx, ty, tw, th)
+                self.expect(
+                    self._handle_decode_hextile_subrects_fg,
+                    2 * subrects,
+                    bg,
+                    color,
+                    subrects,
+                    x,
+                    y,
+                    width,
+                    height,
+                    tx,
+                    ty,
+                    tw,
+                    th,
+                )
         else:
             self._do_next_hextile_subrect(bg, color, x, y, width, height, tx, ty)
 
-    def _handle_decode_hextile_raw(self, block, bg, color, x, y, width, height, tx, ty, tw, th):
+    def _handle_decode_hextile_raw(
+        self, block, bg, color, x, y, width, height, tx, ty, tw, th
+    ):
         """the tile is in raw encoding"""
         self.update_rectangle(tx, ty, tw, th, block)
         self._do_next_hextile_subrect(bg, color, x, y, width, height, tx, ty)
 
-    def _handle_decode_hextile_subrects_coloured(self, block, bg, color, subrects, x, y, width, height, tx, ty, tw, th):
+    def _handle_decode_hextile_subrects_coloured(
+        self, block, bg, color, subrects, x, y, width, height, tx, ty, tw, th
+    ):
         """subrects with their own color"""
         sz = self.bypp + 2
         pos = 0
@@ -446,14 +527,16 @@ class RFBClient(Protocol, TimeoutMixin):
             xy = block[pos2]
             wh = block[pos2 + 1]
             sx = xy >> 4
-            sy = xy & 0xf
+            sy = xy & 0xF
             sw = (wh >> 4) + 1
-            sh = (wh & 0xf) + 1
+            sh = (wh & 0xF) + 1
             self.fill_rectangle(tx + sx, ty + sy, sw, sh, color)
             pos += sz
         self._do_next_hextile_subrect(bg, color, x, y, width, height, tx, ty)
 
-    def _handle_decode_hextile_subrects_fg(self, block, bg, color, subrects, x, y, width, height, tx, ty, tw, th):
+    def _handle_decode_hextile_subrects_fg(
+        self, block, bg, color, subrects, x, y, width, height, tx, ty, tw, th
+    ):
         """all subrect with same color"""
         pos = 0
         end = len(block)
@@ -461,9 +544,9 @@ class RFBClient(Protocol, TimeoutMixin):
             xy = block[pos]
             wh = block[pos + 1]
             sx = xy >> 4
-            sy = xy & 0xf
+            sy = xy & 0xF
             sw = (wh >> 4) + 1
-            sh = (wh & 0xf) + 1
+            sh = (wh & 0xF) + 1
             self.fill_rectangle(tx + sx, ty + sy, sw, sh, color)
             pos += 2
         self._do_next_hextile_subrect(bg, color, x, y, width, height, tx, ty)
@@ -495,13 +578,18 @@ class RFBClient(Protocol, TimeoutMixin):
 
     def _handle_expected(self):
         if self._packet_len >= self._expected_len:
-            buffer = b''.join(self._packet)
+            buffer = b"".join(self._packet)
             while len(buffer) >= self._expected_len:
                 self._already_expecting = 1
 
-                block, buffer = buffer[:self._expected_len], buffer[self._expected_len:]
+                block, buffer = (
+                    buffer[: self._expected_len],
+                    buffer[self._expected_len :],
+                )
                 # ~ log.msg("handle %r with %r\n" % (block, self._expected_handler.__name__))
-                self._expected_handler(block, *self._expected_args, **self._expected_kwargs)
+                self._expected_handler(
+                    block, *self._expected_args, **self._expected_kwargs
+                )
             self._packet[:] = [buffer]
             self._packet_len = len(buffer)
             self._already_expecting = 0
@@ -519,13 +607,40 @@ class RFBClient(Protocol, TimeoutMixin):
     # client -> server messages
     # ------------------------------------------------------
 
-    def set_pixel_format(self, bpp=32, depth=24, bigendian=0, truecolor=1, redmax=255, greenmax=255, bluemax=255,
-                         redshift=0, greenshift=8, blueshift=16):
-        pixformat = pack("!BBBBHHHBBBxxx", bpp, depth, bigendian, truecolor, redmax, greenmax, bluemax, redshift,
-                         greenshift, blueshift)
+    def set_pixel_format(
+        self,
+        bpp=32,
+        depth=24,
+        bigendian=0,
+        truecolor=1,
+        redmax=255,
+        greenmax=255,
+        bluemax=255,
+        redshift=0,
+        greenshift=8,
+        blueshift=16,
+    ):
+        pixformat = pack(
+            "!BBBBHHHBBBxxx",
+            bpp,
+            depth,
+            bigendian,
+            truecolor,
+            redmax,
+            greenmax,
+            bluemax,
+            redshift,
+            greenshift,
+            blueshift,
+        )
         self.transport.write(pack("!Bxxx16s", 0, pixformat))
         # rember these settings
-        self.bpp, self.depth, self.bigendian, self.truecolor = bpp, depth, bigendian, truecolor
+        self.bpp, self.depth, self.bigendian, self.truecolor = (
+            bpp,
+            depth,
+            bigendian,
+            truecolor,
+        )
         self.redmax, self.greenmax, self.bluemax = redmax, greenmax, bluemax
         self.redshift, self.greenshift, self.blueshift = redshift, greenshift, blueshift
         self.bypp = int(self.bpp / 8)  # calc bytes per pixel
@@ -536,7 +651,9 @@ class RFBClient(Protocol, TimeoutMixin):
         for encoding in list_of_encodings:
             self.transport.write(pack("!I", encoding))
 
-    def framebuffer_update_request(self, x=0, y=0, width=None, height=None, incremental=0):
+    def framebuffer_update_request(
+        self, x=0, y=0, width=None, height=None, incremental=0
+    ):
         if width is None:
             width = self.width - x
 
@@ -552,14 +669,14 @@ class RFBClient(Protocol, TimeoutMixin):
 
     def pointer_event(self, x, y, buttonmask=0):
         """Indicates either pointer movement or a pointer button press or release. The pointer is
-           now at (x-position, y-position), and the current state of buttons 1 to 8 are represented
-           by bits 0 to 7 of button-mask respectively, 0 meaning up, 1 meaning down (pressed).
+        now at (x-position, y-position), and the current state of buttons 1 to 8 are represented
+        by bits 0 to 7 of button-mask respectively, 0 meaning up, 1 meaning down (pressed).
         """
         self.transport.write(pack("!BBHH", 5, buttonmask, x, y))
 
     def client_cut_text(self, message):
         """The client has new ASCII text in its cut buffer.
-           (aka clipboard)
+        (aka clipboard)
         """
         self.transport.write(pack("!BxxxI", 6, len(message)) + message)
 
@@ -569,11 +686,11 @@ class RFBClient(Protocol, TimeoutMixin):
     # ------------------------------------------------------
     def vnc_connection_made(self):
         """connection is initialized and ready.
-           typicaly, the pixel format is set here."""
+        typicaly, the pixel format is set here."""
 
     def vnc_request_password(self):
         """a password is needed to log on, use sendPassword() to
-           send one."""
+        send one."""
         if self.factory.password is None:
             log.msg("need a password\n")
             self.transport.loseConnection()
@@ -582,32 +699,32 @@ class RFBClient(Protocol, TimeoutMixin):
 
     def vnc_auth_failed(self, reason):
         """called when the authentication failed.
-           the connection is closed."""
+        the connection is closed."""
         log.msg("Cannot connect: %s\n" % reason)
 
     def begin_update(self):
         """called before a series of updateRectangle(),
-           copy_rectangle() or fillRectangle()."""
+        copy_rectangle() or fillRectangle()."""
 
     def commit_update(self, rectangles=None):
         """called after a series of updateRectangle(), copy_rectangle()
-           or fillRectangle() are finished.
-           typicaly, here is the place to request the next screen 
-           update with FramebufferUpdateRequest(incremental=1).
-           argument is a list of tuples (x,y,w,h) with the updated
-           rectangles."""
+        or fillRectangle() are finished.
+        typicaly, here is the place to request the next screen
+        update with FramebufferUpdateRequest(incremental=1).
+        argument is a list of tuples (x,y,w,h) with the updated
+        rectangles."""
 
     def update_rectangle(self, x, y, width, height, data):
         """new bitmap data. data is a string in the pixel format set
-           up earlier."""
+        up earlier."""
 
     def copy_rectangle(self, srcx, srcy, x, y, width, height):
         """used for copyrect encoding. copy the given rectangle
-           (src, srxy, width, height) to the target coords (x,y)"""
+        (src, srxy, width, height) to the target coords (x,y)"""
 
     def fill_rectangle(self, x, y, width, height, color):
         """fill the area with the color. the color is a string in
-           the pixel format set up earlier"""
+        the pixel format set up earlier"""
         # fallback variant, use update recatngle
         # override with specialized function for better performance
         self.update_rectangle(x, y, width, height, color * width * height)
@@ -617,7 +734,7 @@ class RFBClient(Protocol, TimeoutMixin):
 
     def copy_text(self, text):
         """The server has new ASCII text in its cut buffer.
-           (aka clipboard)"""
+        (aka clipboard)"""
 
 
 class RFBFactory(protocol.ClientFactory):
@@ -635,9 +752,9 @@ class RFBFactory(protocol.ClientFactory):
 class RFBDes(pyDes.des):
     def setKey(self, key):
         """RFB protocol for authentication requires client to encrypt
-           challenge sent by server with password using DES method. However,
-           bits in each byte of the password are put in reverse order before
-           using it as encryption key."""
+        challenge sent by server with password using DES method. However,
+        bits in each byte of the password are put in reverse order before
+        using it as encryption key."""
         newkey = []
         for ki in range(len(key)):
             bsrc = ord(key[ki])

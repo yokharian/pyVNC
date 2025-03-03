@@ -3,6 +3,7 @@ from twisted.internet import reactor
 from pyVNC.RFBToGUI import RFBToGUIeightbits, RFBToGUI
 from pyVNC.rfb import *
 import logging
+
 logger = logging.getLogger("pyVNC")
 
 
@@ -35,7 +36,7 @@ class VNCFactory(RFBFactory):
             ]
 
     def buildProtocol(self, addr):
-        pygame.display.set_caption('pyVNC on %s:%s' % (addr.host, addr.port))
+        pygame.display.set_caption("pyVNC on %s:%s" % (addr.host, addr.port))
         return RFBFactory.buildProtocol(self, addr)
 
     def clientConnectionLost(self, connector, reason):
@@ -44,5 +45,7 @@ class VNCFactory(RFBFactory):
         connector.connect()
 
     def clientConnectionFailed(self, connector, reason):
-        logging.error("Could not connect to the server with reason: %r" % reason.getErrorMessage())
+        logging.error(
+            "Could not connect to the server with reason: %r" % reason.getErrorMessage()
+        )
         reactor.stop()

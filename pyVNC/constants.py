@@ -3,17 +3,26 @@ from pygame.locals import *
 from pyVNC import rfb
 
 
-POINTER = tuple([(8, 8), (4, 4)] + list(pygame.cursors.compile((
-    # 01234567
-    "        ",  # 0
-    "        ",  # 1
-    "        ",  # 2
-    "   .X.  ",  # 3
-    "   X.X  ",  # 4
-    "   .X.  ",  # 5
-    "        ",  # 6
-    "        ",  # 7
-), 'X', '.')))
+POINTER = tuple(
+    [(8, 8), (4, 4)]
+    + list(
+        pygame.cursors.compile(
+            (
+                # 01234567
+                "        ",  # 0
+                "        ",  # 1
+                "        ",  # 2
+                "   .X.  ",  # 3
+                "   X.X  ",  # 4
+                "   .X.  ",  # 5
+                "        ",  # 6
+                "        ",  # 7
+            ),
+            "X",
+            ".",
+        )
+    )
+)
 
 # keyboard mappings pygame -> vnc
 KEYMAPPINGS = {
