@@ -58,7 +58,8 @@ class Client(Thread):
         elif type(key) == str:
             self.screen.protocol.key_event(ord(key), down=0)
 
-    def send_mouse(self, event="Left", position=(0, 0)):
+
+    def _send_mouse_raw(self, event="Left", position=(0, 0)):
         # Left 1, Middle 2, Right 3,
         button_id = None
         if event == "Left":
@@ -70,6 +71,24 @@ class Client(Thread):
 
         self.screen.protocol.pointer_event(position[0], position[1], 0)
         self.screen.protocol.pointer_event(position[0], position[1], button_id)
+
+
+    def send_mouse(self, event="Left", position=(0, 0), duration=0.001):
+        # Left 1, Middle 2, Right 3,
+        button_id = None
+        if event == "Left":
+            button_id = 1
+        elif event == "Middle":
+            button_id = 2
+        elif event == "Right":
+            button_id = 4
+
+        self.screen.protocol.pointer_event(position[0], position[1], 0)
+        time.sleep(duration)
+        self.screen.protocol.pointer_event(position[0], position[1], button_id)
+        time.sleep(duration)
+        self.screen.protocol.pointer_event(position[0], position[1], 0)
+
 
     def add_callback(self, interval, cb):
         l = task.LoopingCall(cb)
