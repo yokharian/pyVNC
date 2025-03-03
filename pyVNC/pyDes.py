@@ -426,6 +426,7 @@ class des(_baseDes):
         for ch in data:
             i = 7
             while i >= 0:
+                ch = ch if isinstance(ch, int) else ord(ch)
                 if ch & (1 << i) != 0:
                     result[pos] = 1
                 else:
