@@ -22,6 +22,9 @@ class Client(Thread):
         self.shared = shared
         self.callbacks = callbacks
 
+    def get_screen(self):
+        return self.screen
+
     def send_key(self, key, duration=0.001):
         if key in constants.MODIFIERS:
             self.screen.protocol.key_event(constants.MODIFIERS[key], down=1)
