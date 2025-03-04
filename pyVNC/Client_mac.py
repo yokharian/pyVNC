@@ -208,7 +208,6 @@ class Client:
                 self.screen.pointer_event(e.pos[0], e.pos[1], self.buttons)
 
 
-
 # Mac alternative (Testing is needed)
 class RFBDes(pyDes.des):
     def setKey(self, key):
@@ -276,4 +275,3 @@ class VNCFactory(VNCFactory_ORIGINAL):
                 RRE_ENCODING,
                 RAW_ENCODING,
             ]
-
