@@ -1188,6 +1188,17 @@ class des(_baseDes):
             # Turn the strings into integers. Python 3 uses a bytes
             # class, which already has this behaviour.
             data = [ord(c) for c in data]
+            raise Exception("Python 2 not supported")
+        if isinstance(data, list):
+            if isinstance(data[0], bytes):
+                data = b"".join(data)
+            else:
+                raise Exception("__String_to_BitList: Unexpected input")
+        elif isinstance(data, bytes):
+            pass  # good
+        else:
+            raise Exception("__String_to_BitList: Unexpected input")
+
         l = len(data) * 8
         result = [0] * l
         pos = 0
