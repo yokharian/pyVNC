@@ -1,8 +1,13 @@
+import os
 from threading import Thread
+
 from twisted.internet import reactor, task
-import pygame
+
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import time
 from pyVNC import constants
+from pyVNC.constants import *
+
 from pyVNC.Buffer import DisplayBuffer, ArrayBuffer
 from pyVNC.VNCFactory import VNCFactory
 import logging
@@ -129,7 +134,62 @@ class Client(Thread):
 
         # run the application
         reactor.callLater(0.1, self.screen.loop)
+        task.LoopingCall(self.check_events).start(0.0001)
         reactor.run(installSignalHandlers=False)
 
     def run(self):
         self.run_block()
+
+    def check_events(self):
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                reactor.stop()
+                pygame.display.quit()
+                pygame.quit()
+            if e.type == KEYDOWN:
+                if e.key in MODIFIERS:
+                    self.screen.key_event(MODIFIERS[e.key], down=1)
+                elif e.key in KEYMAPPINGS:
+                    self.screen.key_event(KEYMAPPINGS[e.key], down=1)
+                elif e.unicode:
+                    self.screen.key_event(ord(e.unicode), down=0)
+                else:
+                    print("warning: unknown key %r" % (e))
+
+            if e.type == KEYUP:
+                if e.key in MODIFIERS:
+                    self.screen.key_event(MODIFIERS[e.key], down=0)
+                if e.key in KEYMAPPINGS:
+                    self.screen.key_event(KEYMAPPINGS[e.key], down=0)
+
+            if e.type == MOUSEMOTION:
+                self.buttons = e.buttons[0] and 1
+                self.buttons |= e.buttons[1] and 2
+                self.buttons |= e.buttons[2] and 4
+                self.screen.pointer_event(e.pos[0], e.pos[1], self.buttons)
+
+            if e.type == MOUSEBUTTONUP:
+                if e.button == 1:
+                    self.buttons &= ~1
+                if e.button == 2:
+                    self.buttons &= ~2
+                if e.button == 3:
+                    self.buttons &= ~4
+                if e.button == 4:
+                    self.buttons &= ~8
+                if e.button == 5:
+                    self.buttons &= ~16
+                self.screen.pointer_event(e.pos[0], e.pos[1], self.buttons)
+
+            if e.type == MOUSEBUTTONDOWN:
+                if e.button == 1:
+                    self.buttons |= 1
+                if e.button == 2:
+                    self.buttons |= 2
+                if e.button == 3:
+                    self.buttons |= 4
+                if e.button == 4:
+                    self.buttons |= 8
+                if e.button == 5:
+                    self.buttons |= 16
+                self.screen.pointer_event(e.pos[0], e.pos[1], self.buttons)
